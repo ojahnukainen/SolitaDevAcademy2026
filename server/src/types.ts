@@ -1,6 +1,14 @@
-export interface ElectricityData {
+export interface ElectricityDataType {
   id: number;
-  timestamp: Date;
-  consumption: bigint;
-  production: bigint;
+  date: Date;
+  starttime: Date;
+  productionamount: number;
+  consumptionamount: number;
+  hourlyprice: number;
 };
+
+export interface ElectricityDataJSON {
+    productionamount: string;  // strings from Decimal serialization
+    consumptionamount: string;
+    hourlyprice: string;
+  }
