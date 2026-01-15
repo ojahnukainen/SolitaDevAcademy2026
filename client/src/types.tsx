@@ -1,10 +1,10 @@
 interface ElectricityDataJSON {
-    id: string;
+    id: number;
     date: string;
-    starttime: string;
-    productionamount: string;  
-    consumptionamount: string;
-    hourlyprice: string;
+    totalProduction: string;  
+    totalConsumption: string;
+    averagePrice: string;
+    longestNegativePriceHours: string;
 }
 
 export default ElectricityDataJSON ;

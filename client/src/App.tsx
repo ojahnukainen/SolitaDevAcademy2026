@@ -1,8 +1,9 @@
 import { useEffect, useState, useMemo, } from 'react'
 import './App.css'
 import axios from 'axios'
-import {  Table, Pagination, ButtonGroup, IconButton, Spinner, Text, VStack } from "@chakra-ui/react"
-import { HiChevronLeft, HiChevronRight } from "react-icons/hi"
+import { Flex, HStack } from '@chakra-ui/react'
+import { ElectricityTable } from './components/table/ElectricityTable'
+import { TablePagination} from './components/table/TablePagination'
 
 import {
   keepPreviousData,
@@ -14,17 +15,11 @@ import {
   useReactTable,
   getCoreRowModel,
   type ColumnDef,
-  flexRender,
 } from '@tanstack/react-table'
+import { VStack } from '@chakra-ui/react'
 
-interface ElectricityDataJSON {
-    id: number;
-    date: string;
-    totalProduction: string;  
-    totalConsumption: string;
-    averagePrice: string;
-    longestNegativePriceHours: string;
-}
+import type ElectricityDataJSON from '@/types'
+import { getElectricityColumns } from './components/table/TableColumns'
 
 
 function App() {
@@ -59,34 +54,7 @@ function App() {
     }}
 
   const columns = useMemo<ColumnDef<ElectricityDataJSON>[]>(
-    () => [
-       {
-        accessorKey: "date",
-        header: "Date",
-        cell: (info) => info.getValue(),
-      },
-      {
-        accessorKey: "totalProduction",
-        header: "Total Production",
-        cell: (info) => info.getValue(),
-      },
-      {
-        accessorKey: "totalConsumption",
-        header: "Total Consumption",
-        cell: (info) => `${info.getValue() !== null ? info.getValue() : "Data not available"}`,
-        //cell: (info) => ()=>{info.getValue() === "null" ? "Data not available" : info.getValue()},
-      },
-      {
-        accessorKey: "averagePrice",
-        header: "Average Price c/kWh",
-        cell: (info) => info.getValue(),
-      },
-      {
-        accessorKey: "longestNegativePriceHours",
-        header: "Consecutive Bello Zero Prices",
-        cell: (info) => info.getValue(),
-      },
-  ], [])
+    () => getElectricityColumns(), [])
 
   const [pagination, setPagination] = useState<PaginationState>({
       pageIndex: 0,
@@ -94,7 +62,7 @@ function App() {
     })
 
   const dataQuery = useQuery({
-    queryKey: ['serverData', pagination],
+    queryKey: ['serverData', serverData],
     queryFn: () => fetchData(pagination),
     placeholderData: keepPreviousData, // don't have 0 rows flash while changing pages/loading next page
   })
@@ -116,87 +84,18 @@ function App() {
       // getPaginationRowModel: getPaginationRowModel(), // If only doing manual pagination, you don't need this
       debugTable: true,
   })
-  console.log("mitä tämä tekee", dataQuery.isLoading)
-  if (dataQuery.isLoading) {
-    return (<VStack colorPalette="teal">
-    <Spinner color="colorPalette.600" />
-    <Text color="colorPalette.600">Loading...</Text>
-  </VStack>)
-  }
 
-  if (dataQuery.isError) {
-    return <div>Error: {dataQuery.error.message}</div>
-  }
+
+ 
 
   return (
     <div style={{height: "80%", width: "80%", display: "flex", justifyContent: "center", alignItems: "center"}}>
+    <Flex direction="column" gap="4" width="100%" height="100%" justify="center" align="center">
+      <ElectricityTable table={table} dataQuery={dataQuery} />
+      <TablePagination pagination={pagination} setPagination={setPagination} dataQuery={dataQuery} />
+    </Flex>
       
-      
-      <Table.Root size="sm" variant="outline" native>
-            <thead>
-              {table.getHeaderGroups().map((headerGroup) => (
-                <tr key={headerGroup.id}>
-                  {headerGroup.headers.map((header) => ( 
-                    <th key={header.id}>
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext(),
-                          )}
-                    </th>
-                  ))}
-                </tr>
-              ))}
-            </thead>
-            <tbody style={{ overflowY: "scroll", maxHeight: "4000px" }}>
-              {table.getRowModel().rows.map((row) => {
-            return (
-              <tr key={row.id}>
-                {row.getVisibleCells().map((cell) => {
-                  return (
-                    <td key={cell.id}>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext(),
-                      )}
-                    </td>
-                  )
-                })}
-              </tr>
-            )
-          })}
-            </tbody>
-          
-          </Table.Root>
-          <Pagination.Root
-            count={dataQuery.data?.rowCount ?? 0}
-            pageSize={pagination.pageSize}
-            page={pagination.pageIndex + 1}
-            onPageChange={(e) => setPagination((old) => ({ ...old, pageIndex: e.page - 1 }))}
-          >
-            <ButtonGroup variant="ghost" size="sm">
-              <Pagination.PrevTrigger asChild>
-                <IconButton>
-                  <HiChevronLeft />
-                </IconButton>
-              </Pagination.PrevTrigger>
-
-              <Pagination.Items
-                render={(page) => (
-                  <IconButton variant={{ base: "ghost", _selected: "outline" }}>
-                    {page.value}
-                  </IconButton>
-                )}
-              />
-
-              <Pagination.NextTrigger asChild>
-                <IconButton>
-                  <HiChevronRight />
-                </IconButton>
-              </Pagination.NextTrigger>
-            </ButtonGroup>
-          </Pagination.Root>
+         
   </div>
   )
 }
