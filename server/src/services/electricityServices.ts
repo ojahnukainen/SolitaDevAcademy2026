@@ -4,7 +4,7 @@ import {v4 as uuidv4} from 'uuid';
 
 async function getAllElectricityData() {   
     
-    const rawData = await prisma.electricitydata.findMany({ take: 1000 });
+    const rawData = await prisma.electricitydata.findMany({take: 1000, orderBy: {date: 'desc'}});
     // eslint-disable-next-line @typescript-eslint/no-unsafe-return
 
     const groupedData = rawData.reduce((acc, record) => {
@@ -106,14 +106,14 @@ function calcData(date:string, dayJson: ElectricityDataJSON[]) {
     console.log('Total production calculated:', totalProduction);
     console.log('Total consumption calculated:', totalConsumption);
     console.log('Longest consecutive negative price calculated:', longest);
-    const results = [{
+    const results = {
         id: uuidv4(),
         date: date,
         averagePrice: dayPrice.toFixed(2),
-        totalProduction: totalProduction,
-        totalConsumption: totalConsumption,
+        totalProduction: totalProduction.toFixed(2),
+        totalConsumption: totalConsumption.toFixed(2),
         longestNegativePriceHours: longest
-    }];
+    };
     
    
 return results;
