@@ -1,12 +1,29 @@
 import { prisma } from '../../lib/prisma.js';
 import { ElectricityDataJSON } from '../types.js';
+import {v4 as uuidv4} from 'uuid';
 
 async function getAllElectricityData() {   
     
-    const getAllElectricityData = await prisma.electricitydata.findFirst();
+    const rawData = await prisma.electricitydata.findMany({ take: 1000 });
     // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-    const allElectricityData = JSON.stringify(getAllElectricityData, (_, v) => typeof v === 'bigint' ? v.toString() : v, 2);
 
+    const groupedData = rawData.reduce((acc, record) => {
+        // Ensure we have a valid date string to use as a key
+        // Since record.date is a Date object, we convert it to a string (YYYY-MM-DD)
+        const dateKey = record.date ? record.date.toISOString().split('T')[0] : 'Unknown Date';
+
+        // If the key doesn't exist yet, create it with an empty array
+            if (!acc[dateKey]) {
+                acc[dateKey] = [];
+            }
+            acc[dateKey].push(record);
+
+            return acc;
+
+    }, {} as Record<string, typeof rawData>);
+
+    const allElectricityData = JSON.stringify(groupedData, (_, v) => typeof v === 'bigint' ? v.toString() : v, 2);
+    console.log('Grouped electricity data:', allElectricityData);
     return (allElectricityData);
     
 };
@@ -56,14 +73,13 @@ async function getUniqueDate() {
     return (uniqueDate);
     
 }
-
-function calcDayData(dayData: string) {
-    
+function calcData(date:string, dayJson: ElectricityDataJSON[]) {
     console.log("at the calcDayData function");
-    console.log('Calculating day data for:', dayData);
-    const dayJson: ElectricityDataJSON[] = JSON.parse(dayData) as ElectricityDataJSON[];
-    console.log('Parsed day data:', dayJson);
-    const totalProduction = dayJson.map((entry: { productionamount: string; }) => parseFloat(entry.productionamount)).reduce((acc: number, curr: number) => acc + curr, 0);
+    //console.log('Calculating day data for:', dayData);
+    
+    const totalProduction = dayJson.map((entry: 
+        { productionamount: string; }) => parseFloat(entry.productionamount))
+            .reduce((acc: number, curr: number) => acc + curr, 0);
 
 
     const totalConsumption = dayJson.map((entry: { consumptionamount: string; }) => (parseFloat(entry.consumptionamount))).reduce((acc: number, curr: number) => acc + curr, 0);
@@ -90,13 +106,30 @@ function calcDayData(dayData: string) {
     console.log('Total production calculated:', totalProduction);
     console.log('Total consumption calculated:', totalConsumption);
     console.log('Longest consecutive negative price calculated:', longest);
-    const results = {
-        averagePrice: dayPrice,
+    const results = [{
+        id: uuidv4(),
+        date: date,
+        averagePrice: dayPrice.toFixed(2),
         totalProduction: totalProduction,
         totalConsumption: totalConsumption,
         longestNegativePriceHours: longest
-    };
+    }];
+    
+   
 return results;
+}
+
+function calcDayData(dayData: string) {
+   //go through each date in the data and calculate the daily values using the calcData function 
+    const dayJson: ElectricityDataJSON[] = JSON.parse(dayData) as ElectricityDataJSON[];
+    console.log('Parsed day data:', dayJson);
+
+    const results = Object.entries(dayJson).map(([date, records]) => {
+          return calcData(date, records);  // Pass the array of records for that date
+      });
+      console.log("Calculated day data results:", results);
+      return results;
+   
 }
 
 

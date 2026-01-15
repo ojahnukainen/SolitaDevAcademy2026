@@ -3,12 +3,20 @@ import electricityServices from '../services/electricityServices.js';
 
 const router = express.Router();
 
+router.use(function(req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  next();
+});
+
 router.get('/', async (_req, res) => {
   
-  const alldata = await electricityServices.getAllElectricityData();
-  if(alldata.length !== undefined){
-    console.log('Electricity data retrieved successfully.', alldata);
-    res.send(alldata);} 
+  const rawData: string = await electricityServices.getAllElectricityData();
+  console.log('Raw electricity data:', rawData);
+  if(rawData.length !== undefined){
+    const calcData =  electricityServices.calcDayData(rawData);
+    
+    res.send(calcData);} 
   else {
       res.status(404).send('No electricity data found.');
     }
