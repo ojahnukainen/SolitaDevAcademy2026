@@ -16,6 +16,7 @@ export const ElectricityTable = ({ table, dataQuery }) => {
   }
 
   return (
+    <>
     <Table.Root size="sm" variant="outline" native>
         <thead>
             {table.getHeaderGroups().map((headerGroup) => (
@@ -51,6 +52,10 @@ export const ElectricityTable = ({ table, dataQuery }) => {
                 )
             })}
         </tbody>
+        
+        
     </Table.Root>
+    
+    </>
   );
 };

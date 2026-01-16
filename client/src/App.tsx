@@ -1,9 +1,9 @@
 import { useEffect, useState, useMemo, } from 'react'
 import './App.css'
 import axios from 'axios'
-import { Flex, HStack } from '@chakra-ui/react'
+import { Flex, HStack, Pagination, ButtonGroup, IconButton } from '@chakra-ui/react'
+import { HiChevronLeft, HiChevronRight } from "react-icons/hi"
 import { ElectricityTable } from './components/table/ElectricityTable'
-import { TablePagination} from './components/table/TablePagination'
 
 import {
   keepPreviousData,
@@ -16,42 +16,12 @@ import {
   getCoreRowModel,
   type ColumnDef,
 } from '@tanstack/react-table'
-import { VStack } from '@chakra-ui/react'
 
 import type ElectricityDataJSON from '@/types'
 import { getElectricityColumns } from './components/table/TableColumns'
 
 
 function App() {
-  const [serverData, setServerData] = useState<ElectricityDataJSON[]>([])
-
-  useEffect(() => {
-      axios.get('http://localhost:3000/api/electricity/',{params:{dateFrom: "2024-01-01"}}).then((response) => {
-          console.log("nodeserver resoponse", response.data)
-          
-          setServerData(response.data as ElectricityDataJSON[])
-        
-      }).catch((error) => {
-        console.error('Error fetching data:', error)
-      })
-        
-
-    }, []);
-
-  async function fetchData(options: {
-    pageIndex: number
-    pageSize: number
-  }) {
-
-    console.log("fetch data func", serverData)
-    return {
-      rows: serverData.slice(
-        options.pageIndex * options.pageSize,
-        (options.pageIndex + 1) * options.pageSize,
-    ),
-      pageCount: Math.ceil(serverData.length / options.pageSize),
-      rowCount: serverData.length,
-    }}
 
   const columns = useMemo<ColumnDef<ElectricityDataJSON>[]>(
     () => getElectricityColumns(), [])
@@ -60,9 +30,24 @@ function App() {
       pageIndex: 0,
       pageSize: 20,
     })
+ 
+  async function fetchData(options: { pageIndex: number, pageSize: number }) {
+    const response = await axios.get('http://localhost:3000/api/electricity/', {
+      params: { page: options.pageIndex + 1, pageSize: options.pageSize }
+    })
+    
+    console.log("totalcount data", response.data.pagination.totalCount)
+    console.log("total pages data", response.data.pagination.totalPages)
+    return {
+      rows: response.data.processedData,
+      rowCount: response.data.pagination.totalCount,
+      pageCount: response.data.pagination.totalPages,
+    }
+  }
+
 
   const dataQuery = useQuery({
-    queryKey: ['serverData', serverData],
+    queryKey: ['serverData', pagination],
     queryFn: () => fetchData(pagination),
     placeholderData: keepPreviousData, // don't have 0 rows flash while changing pages/loading next page
   })
@@ -81,7 +66,7 @@ function App() {
       onPaginationChange: setPagination,
       getCoreRowModel: getCoreRowModel(),
       manualPagination: true, //we're doing manual "server-side" pagination
-      // getPaginationRowModel: getPaginationRowModel(), // If only doing manual pagination, you don't need this
+      
       debugTable: true,
   })
 
@@ -92,7 +77,39 @@ function App() {
     <div style={{height: "80%", width: "80%", display: "flex", justifyContent: "center", alignItems: "center"}}>
     <Flex direction="column" gap="4" width="100%" height="100%" justify="center" align="center">
       <ElectricityTable table={table} dataQuery={dataQuery} />
-      <TablePagination pagination={pagination} setPagination={setPagination} dataQuery={dataQuery} />
+    
+        <Pagination.Root
+          count={dataQuery.data?.rowCount ?? 0}
+          pageSize={pagination.pageSize}
+          page={pagination.pageIndex + 1}
+          onPageChange={(e) =>{console.log("Page change event:", e)} }
+          >
+          <ButtonGroup variant="ghost" size="sm">
+              <Pagination.PrevTrigger asChild>
+                  <IconButton onClick={() => table.previousPage()}>
+                      <HiChevronLeft />
+                  </IconButton>
+                </Pagination.PrevTrigger>
+
+                  <Pagination.Items
+                      render={(page) => (
+                          <IconButton variant={{ base: "ghost", _selected: "outline" }}
+                                      onClick={(e) => {
+                                        
+                                        table.setPageIndex(page.value-1);
+            }}>
+                          {page.value}
+                          </IconButton>
+                      )}
+                  />
+
+                  <Pagination.NextTrigger asChild>
+                  <IconButton onClick={() => table.nextPage()}>
+                      <HiChevronRight />
+                  </IconButton>
+                  </Pagination.NextTrigger>
+              </ButtonGroup>
+            </Pagination.Root>
     </Flex>
       
          
