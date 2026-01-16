@@ -23,18 +23,14 @@ router.get('/', async (req, res) => {
 });
 
 // Get data for a specific date
-router.get('/date', async (req, res) => {
-  const dataFrom = req.query.dateFrom;
-  //const dataTo = req.query.dateTo;
+router.get('/:date', async (req, res) => {
+  const dataFrom = req.params.date;
+  
   console.log('Date from query:', dataFrom);
   const alldata = await electricityServices.getDateData(dataFrom as string);
+ 
+    res.send(alldata); 
   
-  if(alldata.length !== undefined){
-    const calcData =  electricityServices.calcDayData(alldata);
-    res.send(calcData);} 
-  else {
-      res.status(404).send('No electricity data found.');
-    }
 });
 
 router.get('/uniqueDate', async (req, res) => {

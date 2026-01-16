@@ -65,14 +65,37 @@ async function getPaginatedElectricityData(page: string, pageSize: string) {
 
 async function getDateData(dateFrom: string) {   
     
-    const getDateData = await prisma.electricitydata.findMany({where: {
+    const rawData = await prisma.electricitydata.findMany({where: {
         date: {
             equals: new Date(dateFrom)}
         }});
+        console.log('Raw electricity data for date:', rawData);
     // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-    const dateData = JSON.stringify(getDateData, (_, v) => typeof v === 'bigint' ? v.toString() : v, 2);
+     const groupedData = rawData.reduce((acc, record) => {
+        console.log('Processing record for date:', record.date);
+        const dateKey = record.date ? record.date.toISOString().split('T')[0] : 'Unknown Date';
 
-    return (dateData);
+            if (!acc[dateKey]) {
+                acc[dateKey] = [];
+            }
+            acc[dateKey].push(record);
+
+            return acc;
+
+    }, {} as Record<string, typeof getDateData>);
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return 
+    const dateData = JSON.stringify(groupedData, (_, v) => typeof v === 'bigint' ? v.toString() : v, 2);
+    const processedData = await calcDayData(dateData);
+
+    const prosessedRawData = JSON.stringify(rawData, (_, v) => typeof v === 'bigint' ? v.toString() : v, 2);
+   
+
+   const dayDetailsResult = {
+        basicData: processedData,
+        hourlyData: JSON.parse(prosessedRawData)
+    };  
+
+    return (dayDetailsResult);
     
 };
 
@@ -85,9 +108,13 @@ async function getDatesData(uniqueDates: string, order: "asc" | "desc" = "asc") 
     const getDateData = await prisma.electricitydata.findMany({
         where: {
             date: {
-                lte: new Date(dateFrom), gte: new Date(dateTo)}
-
-            }});
+                lte: new Date(dateFrom), gte: new Date(dateTo)
+                }
+            },
+        orderBy: {
+                date: order,
+            },
+        });
        
     const groupedData = getDateData.reduce((acc, record) => {
         

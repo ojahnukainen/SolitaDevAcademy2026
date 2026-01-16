@@ -1,7 +1,7 @@
 import { flexRender } from '@tanstack/react-table'
 import { Table, Spinner, Text, VStack } from "@chakra-ui/react"
 
-export const ElectricityTable = ({ table, dataQuery }) => {
+export const ElectricityTable = ({ table, dataQuery, onRowClick }) => {
 
     console.log("mitä tämä tekee", dataQuery.isLoading)
     if (dataQuery.isLoading) {
@@ -37,7 +37,7 @@ export const ElectricityTable = ({ table, dataQuery }) => {
         <tbody>
             {table.getRowModel().rows.map((row) => {
             return (
-                <tr key={row.id}>
+                <tr key={row.id} onClick={() => onRowClick(row.original.date)} style={{ cursor: 'pointer' }}>
                     {row.getVisibleCells().map((cell) => {
                     return (
                         <td key={cell.id}>

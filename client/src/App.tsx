@@ -1,7 +1,7 @@
 import { useEffect, useState, useMemo, } from 'react'
 import './App.css'
 import axios from 'axios'
-import { Flex, HStack, Pagination, ButtonGroup, IconButton } from '@chakra-ui/react'
+import { Drawer, Flex, Button, CloseButton, Pagination, ButtonGroup, IconButton, Box } from '@chakra-ui/react'
 import { HiChevronLeft, HiChevronRight } from "react-icons/hi"
 import { ElectricityTable } from './components/table/ElectricityTable'
 
@@ -19,9 +19,12 @@ import {
 
 import type ElectricityDataJSON from '@/types'
 import { getElectricityColumns } from './components/table/TableColumns'
+import { DayDetailsView } from './components/DayDetailsView'
 
 
 function App() {
+
+  const [selectedDayId, setSelectedDayId] = useState<number | null>(null)
 
   const columns = useMemo<ColumnDef<ElectricityDataJSON>[]>(
     () => getElectricityColumns(), [])
@@ -52,6 +55,17 @@ function App() {
     placeholderData: keepPreviousData, // don't have 0 rows flash while changing pages/loading next page
   })
 
+  const dayDetailsQuery = useQuery({
+    queryKey: ['dayDetails', selectedDayId],
+    queryFn: async () => {
+      if (!selectedDayId) return null
+      console.log("selectedDayId in query fn:", selectedDayId)
+      const response = await axios.get(`http://localhost:3000/api/electricity/${selectedDayId}`)
+      return response.data
+    },
+    enabled: selectedDayId !== null,  // Only run when a day is selected
+  })
+
   const defaultData = useMemo(() => [], [])
 
   const table = useReactTable({
@@ -74,10 +88,12 @@ function App() {
  
 
   return (
-    <div style={{height: "80%", width: "80%", display: "flex", justifyContent: "center", alignItems: "center"}}>
-    <Flex direction="column" gap="4" width="100%" height="100%" justify="center" align="center">
-      <ElectricityTable table={table} dataQuery={dataQuery} />
-    
+    <>
+    <div style={{ width: "100%", display: "flex", justifyContent: "center", alignItems: "center"}}>
+    <Flex direction="row" gap="4" width="100%" height="100%" justify="center" align="center">
+      <Flex direction="column" gap="4" width="100%" height="100%" justify="center" align="center">
+        <ElectricityTable table={table} dataQuery={dataQuery} onRowClick={setSelectedDayId} />
+      
         <Pagination.Root
           count={dataQuery.data?.rowCount ?? 0}
           pageSize={pagination.pageSize}
@@ -94,10 +110,9 @@ function App() {
                   <Pagination.Items
                       render={(page) => (
                           <IconButton variant={{ base: "ghost", _selected: "outline" }}
-                                      onClick={(e) => {
-                                        
+                                      onClick={() => {
                                         table.setPageIndex(page.value-1);
-            }}>
+                            }}>
                           {page.value}
                           </IconButton>
                       )}
@@ -110,10 +125,24 @@ function App() {
                   </Pagination.NextTrigger>
               </ButtonGroup>
             </Pagination.Root>
+
+       
+      </Flex>
+      <Box width="400px" bgColor="blue.200" >
+       {selectedDayId !== null ? 
+        <DayDetailsView 
+          data={dayDetailsQuery.data}
+          isLoading={dayDetailsQuery.isLoading}
+          onClose={() => setSelectedDayId(null)} 
+        /> : <b>Select a day to see details</b>}
+      </Box>
     </Flex>
-      
-         
+       
+            
+              
   </div>
+        
+        </>
   )
 }
 

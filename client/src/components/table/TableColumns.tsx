@@ -9,12 +9,12 @@ export const getElectricityColumns = (): ColumnDef<ElectricityDataJSON>[] => [
       },
       {
         accessorKey: "totalProduction",
-        header: "Total Production",
+        header: "Total Production MWh/h",
         cell: (info) => info.getValue(),
       },
       {
         accessorKey: "totalConsumption",
-        header: "Total Consumption",
+        header: "Total Consumption kWh",
         cell: (info) => `${info.getValue() !== null ? info.getValue() : "Data not available"}`,
       },
       {
@@ -24,7 +24,7 @@ export const getElectricityColumns = (): ColumnDef<ElectricityDataJSON>[] => [
       },
       {
         accessorKey: "longestNegativePriceHours",
-        header: "Consecutive Bello Zero Prices",
+        header: "Consecutive below Zero Prices in hours",
         cell: (info) => info.getValue(),
       },
   ];
