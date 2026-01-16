@@ -1,7 +1,7 @@
 import { useEffect, useState, useMemo, } from 'react'
 import './App.css'
 import axios from 'axios'
-import { Drawer, Flex, Button, CloseButton, Pagination, ButtonGroup, IconButton, Box } from '@chakra-ui/react'
+import { Drawer, Flex, Button, CloseButton, Pagination, ButtonGroup, IconButton, Box, Heading } from '@chakra-ui/react'
 import { HiChevronLeft, HiChevronRight } from "react-icons/hi"
 import { ElectricityTable } from './components/table/ElectricityTable'
 
@@ -91,7 +91,16 @@ function App() {
     <>
     <div style={{ width: "100%", display: "flex", justifyContent: "center", alignItems: "center"}}>
     <Flex direction="row" gap="4" width="100%" height="100%" justify="center" align="center">
+      
       <Flex direction="column" gap="4" width="100%" height="100%" justify="center" align="center">
+        <Box  bgColor="blue.200" >
+       {selectedDayId !== null ? 
+        <DayDetailsView 
+          data={dayDetailsQuery.data}
+          isLoading={dayDetailsQuery.isLoading}
+          onClose={() => setSelectedDayId(null)} 
+        /> : <Flex direction="column"><Heading style={{fontSize: "xl"}}>Electricity Data Checker</Heading><b>Select a day to see details</b></Flex>}
+      </Box>
         <ElectricityTable table={table} dataQuery={dataQuery} onRowClick={setSelectedDayId} />
       
         <Pagination.Root
@@ -128,14 +137,7 @@ function App() {
 
        
       </Flex>
-      <Box width="400px" bgColor="blue.200" >
-       {selectedDayId !== null ? 
-        <DayDetailsView 
-          data={dayDetailsQuery.data}
-          isLoading={dayDetailsQuery.isLoading}
-          onClose={() => setSelectedDayId(null)} 
-        /> : <b>Select a day to see details</b>}
-      </Box>
+      
     </Flex>
        
             
