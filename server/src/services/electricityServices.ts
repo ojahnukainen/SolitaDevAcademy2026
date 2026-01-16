@@ -4,7 +4,7 @@ import {v4 as uuidv4} from 'uuid';
 
 async function getAllElectricityData() {   
     
-    const rawData = await prisma.electricitydata.findMany({take: 1000, orderBy: {date: 'desc'}});
+    const rawData = await prisma.electricitydata.findMany({orderBy: {date: 'desc'}});
     // eslint-disable-next-line @typescript-eslint/no-unsafe-return
 
     const groupedData = rawData.reduce((acc, record) => {
@@ -28,6 +28,41 @@ async function getAllElectricityData() {
     
 };
 
+async function getPaginatedElectricityData(page: string, pageSize: string) {   
+    console.log('Fetching paginated electricity data for page:', page, 'with page size:', pageSize);
+    const uniqueDates = await prisma.electricitydata.findMany({
+        take: Number(pageSize),
+        distinct: ['date'],
+            select: {
+                date: true
+            },
+            orderBy: {
+                date: 'desc',
+            },
+            skip: (Number(page) - 1) * Number(pageSize),
+        
+        });
+
+    
+    const rawData = await getDatesData(uniqueDates, "desc");
+    console.log('Electricity data for selected dates:', rawData);
+    const processedData = await calcDayData(rawData);
+    const totalUniqueDateCount: number = await getUniqueDateCount();
+    
+    const paginationData = {
+        currentPage: Number(page),
+        pageSize: Number(pageSize),
+        totalCount: totalUniqueDateCount,
+        totalPages: Math.ceil(totalUniqueDateCount / Number(pageSize)),
+    };
+        
+    const result = {
+        pagination: paginationData,
+        processedData: processedData
+    };
+    return result;
+};
+
 async function getDateData(dateFrom: string) {   
     
     const getDateData = await prisma.electricitydata.findMany({where: {
@@ -41,19 +76,37 @@ async function getDateData(dateFrom: string) {
     
 };
 
-async function getDatesData(dateFrom: string, dateTo: string) {   
+async function getDatesData(uniqueDates: string, order: "asc" | "desc" = "asc") {   
     
+    const dateFrom = uniqueDates[0].date;
+    const dateTo = uniqueDates[uniqueDates.length -1].date;
+
+    if(order === "desc"){
     const getDateData = await prisma.electricitydata.findMany({
         where: {
             date: {
-                gte: new Date(dateFrom), lte: new Date(dateTo)}
+                lte: new Date(dateFrom), gte: new Date(dateTo)}
 
             }});
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-    const datesData = JSON.stringify(getDateData, (_, v) => typeof v === 'bigint' ? v.toString() : v, 2);
+       
+    const groupedData = getDateData.reduce((acc, record) => {
+        
+        const dateKey = record.date ? record.date.toISOString().split('T')[0] : 'Unknown Date';
+
+        // If the key doesn't exist yet, create it with an empty array
+            if (!acc[dateKey]) {
+                acc[dateKey] = [];
+            }
+            acc[dateKey].push(record);
+
+            return acc;
+
+    }, {} as Record<string, typeof getDateData>);
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return 
+    const datesData = JSON.stringify(groupedData, (_, v) => typeof v === 'bigint' ? v.toString() : v, 2);
 
     return (datesData);
-    
+    }
 };
 
 async function getUniqueDate() {   
@@ -73,9 +126,23 @@ async function getUniqueDate() {
     return (uniqueDate);
     
 }
-function calcData(date:string, dayJson: ElectricityDataJSON[]) {
+async function getUniqueDateCount() {   
+    
+    const getUniqueDateCount = await prisma.electricitydata.findMany({  
+        distinct: ['date'],
+        select: {
+            date: true
+        },
+        orderBy: {
+            date: 'desc',
+        }, 
+    });
+    return getUniqueDateCount.length;
+}
+
+function calcData(date: Date, dayJson: ElectricityDataJSON[]) {
     console.log("at the calcDayData function");
-    //console.log('Calculating day data for:', dayData);
+   
     
     const totalProduction = dayJson.map((entry: 
         { productionamount: string; }) => parseFloat(entry.productionamount))
@@ -119,18 +186,17 @@ function calcData(date:string, dayJson: ElectricityDataJSON[]) {
 return results;
 }
 
-function calcDayData(dayData: string) {
+async function calcDayData(dayData: string) {
    //go through each date in the data and calculate the daily values using the calcData function 
     const dayJson: ElectricityDataJSON[] = JSON.parse(dayData) as ElectricityDataJSON[];
-    console.log('Parsed day data:', dayJson);
 
-    const results = Object.entries(dayJson).map(([date, records]) => {
+
+      const results = await Promise.all(Object.entries(dayJson).map(async ([date, records]) => {
           return calcData(date, records);  // Pass the array of records for that date
-      });
+      }));
       console.log("Calculated day data results:", results);
       return results;
-   
 }
 
 
-export default { getAllElectricityData, getDateData, getDatesData, getUniqueDate, calcDayData };
+export default { getAllElectricityData, getPaginatedElectricityData, getDateData, getDatesData, getUniqueDate, calcDayData };

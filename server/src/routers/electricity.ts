@@ -9,17 +9,16 @@ router.use(function(req, res, next) {
   next();
 });
 
-router.get('/', async (_req, res) => {
+router.get('/', async (req, res) => {
   
-  const rawData: string = await electricityServices.getAllElectricityData();
-  console.log('Raw electricity data:', rawData);
-  if(rawData.length !== undefined){
-    const calcData =  electricityServices.calcDayData(rawData);
-    
-    res.send(calcData);} 
-  else {
-      res.status(404).send('No electricity data found.');
-    }
+  const page = req.query.page;
+  const pageSize = req.query.pageSize;
+  
+  const calcData = await electricityServices.getPaginatedElectricityData(page as string, pageSize as string);
+  
+  console.log('Raw electricity data:', calcData.pagination);
+  res.send(calcData);
+ 
   
 });
 
