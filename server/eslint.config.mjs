@@ -17,7 +17,7 @@ export default tseslint.config({
   plugins: {
     "@stylistic": stylistic,
   },
-  ignores:["dist/*"],
+  ignores:["dist/*", "generated/*"],
   rules: {
     '@stylistic/semi': 'error',
     '@typescript-eslint/no-unsafe-assignment': 'error',

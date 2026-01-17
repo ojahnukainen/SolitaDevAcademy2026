@@ -8,7 +8,7 @@ export interface ElectricityDataType {
 };
 
 export interface ElectricityDataJSON {
-    productionamount: string;  // strings from Decimal serialization
-    consumptionamount: string;
-    hourlyprice: string;
-  }
+  productionamount: string;  // strings from Decimal serialization
+  consumptionamount: string;
+  hourlyprice: string;
+}
