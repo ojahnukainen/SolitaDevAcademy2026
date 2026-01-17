@@ -17,7 +17,7 @@ import {
   type ColumnDef,
 } from '@tanstack/react-table'
 
-import type { ElectricityDataJSON }  from '@/types'
+import type { ElectricityDataJSON } from '@/types'
 import { getElectricityColumns } from './components/table/TableColumns'
 import { DayDetailsView } from './components/DayDetailsView'
 
@@ -25,6 +25,7 @@ import { DayDetailsView } from './components/DayDetailsView'
 function App() {
 
   const [selectedDayId, setSelectedDayId] = useState<string | null>(null)
+  const defaultData = useMemo(() => [], [])
 
   const columns = useMemo<ColumnDef<ElectricityDataJSON>[]>(
     () => getElectricityColumns(), [])
@@ -39,8 +40,6 @@ function App() {
       params: { page: options.pageIndex + 1, pageSize: options.pageSize }
     })
 
-    console.log("totalcount data", response.data.pagination.totalCount)
-    console.log("total pages data", response.data.pagination.totalPages)
     return {
       rows: response.data.processedData,
       rowCount: response.data.pagination.totalCount,
@@ -58,19 +57,16 @@ function App() {
     queryKey: ['dayDetails', selectedDayId],
     queryFn: async () => {
       if (!selectedDayId) return null
-      console.log("selectedDayId in query fn:", selectedDayId)
       const response = await axios.get(`http://localhost:3000/api/electricity/${selectedDayId}`)
       return response.data
     },
     enabled: selectedDayId !== null,  // Only run when a day is selected
   })
 
-  const defaultData = useMemo(() => [], [])
-
   const table = useReactTable({
     data: dataQuery.data?.rows ?? defaultData,
     columns,
-    rowCount: dataQuery.data?.rowCount, 
+    rowCount: dataQuery.data?.rowCount,
     state: {
       pagination,
     },
@@ -100,7 +96,6 @@ function App() {
               count={dataQuery.data?.rowCount ?? 0}
               pageSize={pagination.pageSize}
               page={pagination.pageIndex + 1}
-              onPageChange={(e) => { console.log("Page change event:", e) }}
             >
               <ButtonGroup variant="ghost" size="sm">
                 <Pagination.PrevTrigger asChild>

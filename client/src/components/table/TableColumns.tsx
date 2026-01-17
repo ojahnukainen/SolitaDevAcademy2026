@@ -1,5 +1,5 @@
 import { type ColumnDef } from '@tanstack/react-table'
-import type  { ElectricityDataJSON } from '@/types'
+import type { ElectricityDataJSON } from '@/types'
 
 export const getElectricityColumns = (): ColumnDef<ElectricityDataJSON>[] => [
   {
@@ -9,17 +9,17 @@ export const getElectricityColumns = (): ColumnDef<ElectricityDataJSON>[] => [
   },
   {
     accessorKey: "totalProduction",
-    header: "Total Production MWh/h",
+    header: "Total Production in GW",
     cell: (info) => info.getValue(),
   },
   {
     accessorKey: "totalConsumption",
-    header: "Total Consumption kWh",
+    header: "Total Consumption in GW",
     cell: (info) => `${info.getValue() !== null ? info.getValue() : "Data not available"}`,
   },
   {
     accessorKey: "averagePrice",
-    header: "Average Price c/kWh",
+    header: "Average Price in c/kW",
     cell: (info) => info.getValue(),
   },
   {

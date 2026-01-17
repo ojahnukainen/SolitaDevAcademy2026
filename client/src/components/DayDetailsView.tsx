@@ -66,15 +66,15 @@ export const DayDetailsView = ({ data, isLoading, onClose }: Props) => {
                     <Stat.ValueText>{data.basicData[0].date}</Stat.ValueText>
                 </Stat.Root>
                 <Stat.Root>
-                    <Stat.Label>Total Production MWh/h</Stat.Label>
+                    <Stat.Label>Total Production in GW</Stat.Label>
                     <Stat.ValueText>{data.basicData[0].totalProduction}</Stat.ValueText>
                 </Stat.Root>
                 <Stat.Root>
-                    <Stat.Label>Total Consumption kWh</Stat.Label>
+                    <Stat.Label>Total Consumption in GW</Stat.Label>
                     <Stat.ValueText>{data.basicData[0].totalConsumption}</Stat.ValueText>
                 </Stat.Root>
                 <Stat.Root>
-                    <Stat.Label>Average Price c/kWh</Stat.Label>
+                    <Stat.Label>Average Price in ¢/kW</Stat.Label>
                     <Stat.ValueText>{data.basicData[0].averagePrice}</Stat.ValueText>
                 </Stat.Root>
                 <Stat.Root>
