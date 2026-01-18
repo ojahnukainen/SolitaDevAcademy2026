@@ -156,6 +156,7 @@ async function getUniqueDateCount() {
 function calcData(date: Date, dayJson: ElectricityDataJSON[]) {
   const MWhToGWh = 1000;
   const kWhToMWh = 1000000;
+
   const totalProduction = dayJson.map((entry:
     { productionamount: string; }) => parseFloat(entry.productionamount))
     .reduce((acc: number, curr: number) => acc + curr, 0) / MWhToGWh;
@@ -187,8 +188,8 @@ function calcData(date: Date, dayJson: ElectricityDataJSON[]) {
     id: uuidv4(),
     date: date,
     averagePrice: dayPrice.toFixed(2),
-    totalProduction: totalProduction.toFixed(2),
-    totalConsumption: totalConsumption.toFixed(2),
+    totalProduction: (totalProduction).toFixed(2),
+    totalConsumption: (totalConsumption).toFixed(2),
     longestNegativePriceHours: longest
   };
 
