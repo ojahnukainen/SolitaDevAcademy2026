@@ -2,7 +2,9 @@
 
 ![Version](https://img.shields.io/badge/version-1.0.0-green.svg) ![Docker](https://img.shields.io/badge/docker-supported-blue.svg)
 
-A full-stack application built for the Solita Dev Academy 2026 pre-assignment. This solution visualizes electricity price and consumption data and view hourly data in graphs
+A full-stack application built for the Solita Dev Academy 2026 pre-assignment. This solution visualizes electricity price and consumption data and view hourly data in graphs.
+
+The assigment can be find from here: https://github.com/solita/dev-academy-spring-2026-exercise
 
 
 ## ✨ Key Features
@@ -27,11 +29,11 @@ First, clone the original assignment repository (for the data) and this solution
 
 #### 1. Clone the assignment data (Check the URL in your instructions)
 ```bash
-git clone [https://github.com/solita/dev-academy-spring-2026-exercise.git](https://github.com/solita/dev-academy-spring-2026-exercise.git)
+git clone https://github.com/solita/dev-academy-spring-2026-exercise.git
 ```
 #### 2. Clone this solution
 ```bash
-git clone [https://github.com/ojahnukainen/SolitaDevAcademy2026.git](https://github.com/ojahnukainen/SolitaDevAcademy2026.git)
+git clone https://github.com/ojahnukainen/SolitaDevAcademy2026.git
 ```
 After cloning you should have following structure
 ```text
