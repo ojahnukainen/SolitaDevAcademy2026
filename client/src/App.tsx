@@ -21,7 +21,6 @@ import type { ElectricityDataJSON } from '@/types'
 import { getElectricityColumns } from './components/table/TableColumns'
 import { DayDetailsView } from './components/DayDetailsView'
 
-
 function App() {
 
   const [selectedDayId, setSelectedDayId] = useState<string | null>(null)
@@ -50,7 +49,7 @@ function App() {
   const dataQuery = useQuery({
     queryKey: ['serverData', pagination],
     queryFn: () => fetchData(pagination),
-    placeholderData: keepPreviousData, // don't have 0 rows flash while changing pages/loading next page
+    placeholderData: keepPreviousData,
   })
 
   const dayDetailsQuery = useQuery({

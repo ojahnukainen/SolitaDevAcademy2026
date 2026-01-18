@@ -9,11 +9,16 @@ router.get('/', async (req, res) => {
   const pageSize = req.query.pageSize;
 
   if (!page || !pageSize) {
-    res.status(400).json('Missing page or pageSize query parameters.');
+    res.status(400).json('Something is now wrong, missing page or pageSize query parameters.');
   }
 
   const calcData = await electricityServices.getPaginatedElectricityData(page as string, pageSize as string);
-
+  if (calcData.error !== undefined) {
+    console.error(calcData.error);
+     return res.status(500).end();
+  } 
+  console.log('Calculated data:', calcData);
+ 
   res.send(calcData);
 });
 
@@ -22,10 +27,9 @@ router.get('/:date', async (req, res) => {
   const dataFrom = req.params.date;
 
   if (!dataFrom) {
-    return res.status(400).json('Missing date parameter.');
+     res.status(400).json('Something is now wrong, Missing date parameter.');
   }
 
-  console.log('Date from query:', dataFrom);
   const alldata = await electricityServices.getDateData(dataFrom);
 
   res.send(alldata);
