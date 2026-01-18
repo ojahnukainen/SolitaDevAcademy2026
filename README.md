@@ -1,4 +1,4 @@
-# ⚡ Solita Dev Academy 2026 - Electricity Data Display
+# Solita Dev Academy 2026 - Electricity Data Display
 
 ![Version](https://img.shields.io/badge/version-1.0.0-green.svg) ![Docker](https://img.shields.io/badge/docker-supported-blue.svg)
 
@@ -7,24 +7,24 @@ A full-stack application built for the Solita Dev Academy 2026 pre-assignment. T
 The assigment can be find from here: https://github.com/solita/dev-academy-spring-2026-exercise
 
 
-## ✨ Key Features
+## Key Features
 * **Server-Side Pagination:** Efficiently handles large datasets by loading data in chunks.
 * **Daily Data View:** Detailed individual views for specific dates.
 * **Visualization:** Graphs to visualize hourly electricity consumption and pricing.
 
-## 🛠️ Technologies Used
+## Technologies Used
 * **Frontend:** React, Chakra UI, TanStack Table, TanStack Query
 * **Backend:** Node.js, Express, Prisma ORM
 * **Infrastructure:** Docker, Docker Compose
 
-## 🚀 Installation & Setup
+## Installation & Setup
 This project uses Docker to orchestrate the client, server, and database.
 
 ### 1. Prerequisites
 * [Docker Desktop](https://docs.docker.com/desktop/) (Ensure it is running)
 
 ### 2.Clone the repositories
-⚠️ **Important:** This solution relies on the original assignment data.
+**Important:** This solution relies on the original assignment data.
 First, clone the original assignment repository (for the data) and this solution repository into the same folder.
 
 #### 1. Clone the assignment data (Check the URL in your instructions)
